@@ -1,0 +1,33 @@
+#
+#	GROUP configuration file for keepalived
+#
+
+<% if @vrrp != [] or @autogroup -%>
+vrrp_sync_group <%= @name %> {	# must be before vrrp_instance declaration
+	group {
+<% if @autogroup -%>
+		include *.<%= @name %>.vrrpname
+<% else -%>
+<% @vrrp.each do |value| -%>
+		<%= value %>
+<% end -%>
+<% end -%>
+	}
+<% if @conntrackd -%>
+	notify_master "/etc/conntrackd/primary-backup.sh primary"
+	notify_backup "/etc/conntrackd/primary-backup.sh backup"
+	notify_fault "/etc/conntrackd/primary-backup.sh fault"
+<% end -%>
+<% if @runnotify -%>
+	# for ANY state transition. "notify" script is called AFTER the
+	# notify_* script(s) and is executed with 3 arguments provided by
+	# keepalived (ie don't include parameters in the notify line).
+	# arguments
+	# $1 = "GROUP"|"INSTANCE"
+	# $2 = name of group or instance
+	# $3 = target state of transition ("MASTER"|"BACKUP"|"FAULT")
+	notify /etc/keepalived/groups/<%= @name %>/notify.sh
+<% end -%>
+}
+<% end -%>
+

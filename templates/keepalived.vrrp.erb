@@ -1,0 +1,47 @@
+#
+#	VRRP configuration file for keepalived
+#
+
+vrrp_instance <%= @instance %> {
+	interface <%= @interface %>	# multicast communication link
+<% if @mcastsrc != '' -%>
+	mcast_src_ip <%= @mcastsrc %>	# multicast source ip address
+<% end -%>
+	state <%= @state %>		# MASTER or BACKUP
+	virtual_router_id <%= @routerid %>
+<% if @priority != '' -%>
+	priority <%= @priority %>
+<% else -%>
+<% if @state == 'MASTER' -%>
+	priority 150
+<% else -%>
+	priority 50
+<% end -%>
+<% end -%>
+	advert_int <%= @advertint %>	# advertisement interval in seconds
+	authentication {
+		auth_type PASS
+		auth_pass <%= @password %>
+	}
+	virtual_ipaddress {
+		<%= @ipaddress %>	# the VIP to share eg: ip/cidr dev ethx
+	}
+<% if @trackprimary == false -%>
+	dont_track_primary
+<% end -%>
+<% if @trackif != [] -%>
+	track_interfaces {
+<% @trackif.each do |value| -%>
+		<%= value %>
+<% end -%>
+	}
+<% end -%>
+<% if @trackscript != [] -%>
+	track_script {
+<% @trackscript.each do |value| -%>
+		<%= value %>
+<% end -%>
+	}
+<% end -%>
+}
+

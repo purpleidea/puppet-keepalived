@@ -1,0 +1,16 @@
+#
+#	SCRIPT configuration file for keepalived
+#
+
+vrrp_script <%= @name %> {
+	script "<%= @script %>"		# script to run
+	interval <%= @interval %>	# check every <%= @interval %> seconds
+#	weight <%= @weight %>		# default prio: <%= @weight %> if KO
+<% if @rise.to_i > 0 -%>
+	rise <%= @rise %>		# require <%= @rise %> successes for OK
+<% end -%>
+<% if @fall.to_i > 0 -%>
+	fall <%= @fall %>		# require <%= @fall %> failures for KO
+<% end -%>
+}
+
