@@ -21,7 +21,8 @@ vrrp_instance <%= @instance %> {
 	advert_int <%= @advertint %>	# advertisement interval in seconds
 	authentication {
 		auth_type PASS
-		auth_pass <%= @password %>
+		<%-# password is eight characters max... avoid the warning! -%>
+		auth_pass <%= @password[0,8] %>
 	}
 	virtual_ipaddress {
 		<%= @ipaddress %>	# the VIP to share eg: ip/cidr dev ethx
