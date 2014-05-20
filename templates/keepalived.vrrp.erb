@@ -18,6 +18,14 @@ vrrp_instance <%= @instance %> {
 	priority 50
 <% end -%>
 <% end -%>
+<% if @state == 'BACKUP' -%>
+<% if @nopreempt == true -%>
+	nopreempt
+<% end -%>
+<% if @nopreempt == false and @preempt_delay.to_i > 0 -%>
+	preempt_delay <%= @preempt_delay %>
+<% end -%>
+<% end -%>
 	advert_int <%= @advertint %>	# advertisement interval in seconds
 	authentication {
 		auth_type PASS

@@ -15,23 +15,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# TODO: potentially use these two options ?
-
-# * nopreempt
-# VRRP will normally preempt a lower priority
-# machine when a higher priority machine comes
-# online.  "nopreempt" allows the lower priority
-# machine to maintain the master role, even when
-# a higher priority machine comes back online.
-# NOTE: For this to work, the initial state of this
-# entry must be BACKUP.
-#
-# * preempt_delay 300	# waits 5 minutes
-# Seconds after startup until preemption
-# (if not disabled by "nopreempt").
-# Range: 0 (default) to 1,000
-# NOTE: For this to work, the initial state of this
-# entry must be BACKUP.
 
 class keepalived (
 	$groups = ['default'],			# auto make these empty groups
@@ -153,6 +136,8 @@ define keepalived::group(
 
 define keepalived::vrrp(
 	$state = 'BACKUP',		# MASTER or BACKUP
+	$nopreempt = false,		# nopreempt require BACKUP as $state
+	$preempt_delay = 0,		# preempt_delay require BACKUP as $state
 	$interface,
 	$ipaddress,
 	$routerid,
