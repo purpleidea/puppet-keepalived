@@ -1,4 +1,4 @@
-# Keepalived templating module by James
+# Keepalived module by James
 # Copyright (C) 2012-2013+ James Shubin
 # Written by James Shubin <james@shubin.ca>
 #
@@ -15,42 +15,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-class keepalived (
-	$groups = ['default'],			# auto make these empty groups
-	$shorewall = true,			# generate shorewall vrrp rules
-	$conntrackd = false,			# enable conntrackd integration
-	$start = false				# start on boot and keep running
+define keepalived::group(
+	$vrrp = [],
+	$runnotify = true,		# run scripts in group/notify.d/ ?
+	$autogroup = false		# internal option, private or expert use
 ) {
-	package { 'keepalived':
-		ensure => present,
-	}
+	include keepalived
 
-	$ensure = $start ? {
-		true => running,
-		default => undef,		# we don't want ensure => stopped
-	}
+	$conntrackd = $keepalived::conntrackd
 
-	service { 'keepalived':
-		enable => $start,		# start on boot
-		ensure => $ensure,		# ensures nothing if undef
-		hasstatus => true,		# use status command to monitor
-		hasrestart => true,		# use restart, not start; stop
-		require => Package['keepalived'],
-	}
-
-	file { '/etc/keepalived/':
-		ensure => directory,		# make sure this is a directory
-		recurse => true,		# recursively manage directory
-		purge => true,			# purge all unmanaged files
-		force => true,			# also purge subdirs and links
-		owner => root,
-		group => root,
-		mode => 644,			# u=rwx,go=rx
-		notify => Service['keepalived'],
-		require => Package['keepalived'],
-	}
-
-	file { '/etc/keepalived/groups/':
+	file { "/etc/keepalived/groups/${name}/":
 		ensure => directory,		# make sure this is a directory
 		recurse => true,		# recursively manage directory
 		purge => true,			# purge all unmanaged files
@@ -59,21 +33,41 @@ class keepalived (
 		group => root,
 		mode => 644,			# u=rwx,go=rx
 		#notify => Service['keepalived'],
-		require => File['/etc/keepalived/'],
+		require => File['/etc/keepalived/groups/'],
 	}
 
-	file { '/etc/keepalived/keepalived.conf':
-		content => template('keepalived/keepalived.conf.erb'),
+	file { "/etc/keepalived/groups/${name}/notify.d/":
+		ensure => directory,		# make sure this is a directory
+		recurse => true,		# recursively manage directory
+		purge => true,			# purge all unmanaged files
+		force => true,			# also purge subdirs and links
 		owner => root,
 		group => root,
+		mode => 644,			# u=rwx,go=rx
+		#notify => Service['keepalived'],
+		require => File["/etc/keepalived/groups/${name}/"],
+	}
+
+	# TODO: this could become a template if we want to add in some features
+	file { "/etc/keepalived/groups/${name}/notify.sh":
+		source => 'puppet:///modules/keepalived/notify.sh',
+		owner => root,
+		group => nobody,
+		mode => 700,		# u=rwx
+		ensure => $runnotify ? {
+			false => absent,
+			default => present,
+		},
+		#notify => Service['keepalived'],
+	}
+
+	file { "/etc/keepalived/${name}.group":
+		content => template('keepalived/keepalived.group.erb'),
+		owner => root,
+		group => nobody,
 		mode => 600,		# u=rw
 		ensure => present,
 		notify => Service['keepalived'],
-	}
-
-	# automatically create some empty groups for autogrouping
-	keepalived::group { $groups:
-		autogroup => true,
 	}
 }
 
