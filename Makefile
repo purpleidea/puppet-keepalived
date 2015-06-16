@@ -25,8 +25,8 @@ SPEC = rpmbuild/SPECS/puppet-keepalived.spec
 SOURCE = rpmbuild/SOURCES/puppet-keepalived-$(VERSION).tar.bz2
 SRPM = rpmbuild/SRPMS/puppet-keepalived-$(VERSION)-$(RELEASE).src.rpm
 RPM = rpmbuild/RPMS/puppet-keepalived-$(VERSION)-$(RELEASE).rpm
-SERVER = 'download.gluster.org'
-REMOTE_PATH = 'purpleidea/puppet-keepalived'
+SERVER = 'dl.fedoraproject.org'
+REMOTE_PATH = 'pub/puppet-keepalived'
 
 all: docs rpm
 
